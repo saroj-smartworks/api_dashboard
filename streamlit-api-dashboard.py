@@ -1,16 +1,16 @@
 import pandas as pd
-# import plotly.express as px
+import plotly.express as px
 import streamlit as st
 import plotly.graph_objects as go
 import psycopg2
 
 # Establish connection to Redshift
 conn = psycopg2.connect(
-    host='13.214.233.50',
-    port='5439',
-    database='smartworks_analytics',
-    user='smartworks',
-    password='Smartworks123'
+    host=st.secrets.db_credentials.host,
+    port= st.secrets.db_credentials.port,
+    database=st.secrets.db_credentials.db,
+    user=st.secrets.db_credentials.db_username,
+    password=st.secrets.db_credentials.db_password
 )
 
 # Specify the table name to read
