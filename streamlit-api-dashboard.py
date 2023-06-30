@@ -3,6 +3,7 @@ import plotly.express as px
 import streamlit as st
 import plotly.graph_objects as go
 import psycopg2
+import numpy as np
 
 # Establish connection to Redshift
 conn = psycopg2.connect(
