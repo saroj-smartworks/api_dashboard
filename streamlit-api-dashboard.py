@@ -174,7 +174,7 @@ with placeholder.container():
         fig.add_trace(go.Bar(x=grouped_data['date'], y=grouped_data[col], name=col,
                              text=grouped_data[col], textposition='inside'))
 
-    fig.update_layout(barmode='group', title=dict(text='API Request Timeline', x=0.5), autosize=True,
-                      margin=dict(l=50, r=0, t=50, b=50, autoexpand=True))
+    fig.update_layout(barmode='group', title=dict(text='API Request Timeline', x=0.6), autosize=True,
+                      margin=dict(l=0, r=0, t=50, b=50, autoexpand=True))
     fig.update_xaxes(type='category')
     st.plotly_chart(fig)
