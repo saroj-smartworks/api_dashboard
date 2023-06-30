@@ -58,6 +58,8 @@ total_sum = pivot_table[[200, 204, 206, 210, 400, 401, 406, 409]].sum(axis=1)
 # Divide the sum of the first two columns by the sum of the remaining two columns
 pivot_table['Fail %'] = (fail_sum / total_sum)*100
 
+pivot_table['Fail %'] = np.where(np.isinf(pivot_table['Fail %']), -1, pivot_table['Fail %'])
+
 pivot_table['Fail %'] = pivot_table['Fail %'].astype(int)
 
 # Extract the values for api_type and api_name_extract
