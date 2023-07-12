@@ -4,6 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import psycopg2
 import numpy as np
+from datetime import datetime
 
 # Establish connection to Redshift
 conn = psycopg2.connect(
@@ -40,10 +41,19 @@ st.markdown(
 # pivot_table = df.pivot_table(index=['date', 'method', 'api_name'], columns='responseStatus', values='count', aggfunc='sum', fill_value=0, margins=True, margins_name='Total')
 
 # Pivot the table
-pivot_table = df.pivot_table(index=['date', 'method', 'api_name'], columns='responsestatus', values='count', aggfunc='sum', fill_value=0)
+pivot_table = df.pivot_table(index=['date', 'method', 'api_name'], columns='responsestatus',
+                             values='count', aggfunc='sum', fill_value=0)
 
 
 pivot_table.reset_index(inplace=True)
+
+# Find the minimum and maximum date values
+min_date = df['date'].min()
+max_date = df['date'].max()
+
+# Convert min_date and max_date to datetime objects
+min_date = pd.to_datetime(min_date)
+max_date = pd.to_datetime(max_date)
 
 # Convert date column to datetime type
 pivot_table['date'] = pd.to_datetime(pivot_table['date']).dt.date
@@ -55,6 +65,8 @@ pivot_table['date'] = pd.to_datetime(pivot_table['date']).dt.date
 # Calculate the sum of the first two columns and the sum of the remaining two columns
 fail_sum = pivot_table[[400, 401, 406, 409]].sum(axis=1)
 total_sum = pivot_table[[200, 204, 206, 210, 400, 401, 406, 409]].sum(axis=1)
+
+pivot_table['Total Request'] = total_sum
 
 # Divide the sum of the first two columns by the sum of the remaining two columns
 pivot_table['Fail %'] = (fail_sum / total_sum)*100
@@ -89,8 +101,8 @@ attribute_values = attribute_values[attribute_values != 'Total']
 
 # Add a date filter using Streamlit
 with st.sidebar:
-    start_date = st.date_input('Start Date')
-    end_date = st.date_input('End Date')
+    start_date = st.date_input('Start Date', value=min_date, min_value=min_date, max_value=max_date)
+    end_date = st.date_input('End Date', value=max_date, min_value=min_date, max_value=max_date)
 
 # Add a filter widget
 selected_method = st.sidebar.multiselect('Select Method', options=attribute_values, default=attribute_values)
@@ -127,7 +139,7 @@ df_line['total'] = df_line[columns_to_combine_total].sum(axis=1)
 
 # Group by date and calculate the sum of 'success', 'fail', and 'total'
 grouped_data = df_line.groupby('date').agg({'success': 'sum', 'fail': 'sum', 'total': 'sum'}).reset_index()
-
+grouped_data['Fail %'] = (grouped_data['fail']/grouped_data['total'])*100
 # Calculate the sum of the specified columns
 total_fails = df_selection[columns_to_combine_fail].sum().sum()
 
@@ -165,16 +177,26 @@ with placeholder.container():
             label="Fail %",
             value=int((total_fails/total_requests)*100)
         )
+###############################################################################################
+    # Display the DataFrame using st.dataframe
     st.dataframe(df_selection)
+###############################################################################################
+
     # Display the timeline chart
 
+    # Create the line chart
+    fig_fail_percent = px.line(grouped_data, x="date", y="Fail %", title="Fail Percentage Over Time")
+    # Update the layout of the figure
+    fig_fail_percent.update_layout(barmode='group', title=dict(text='Fail Percentage Over Time', x=0.4), autosize=True,
+                      margin=dict(l=0, r=0, t=50, b=50, autoexpand=True))
+    st.plotly_chart(fig_fail_percent, use_container_width=True)
     # Create the side-by-side bar chart with values inside bars
     fig = go.Figure()
     for col in ['total', 'success', 'fail']:
         fig.add_trace(go.Bar(x=grouped_data['date'], y=grouped_data[col], name=col,
                              text=grouped_data[col], textposition='inside'))
 
-    fig.update_layout(barmode='group', title=dict(text='API Request Timeline', x=0.6), autosize=True,
+    fig.update_layout(barmode='group', title=dict(text='API Request Timeline', x=0.4), autosize=True,
                       margin=dict(l=0, r=0, t=50, b=50, autoexpand=True))
     fig.update_xaxes(type='category')
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
