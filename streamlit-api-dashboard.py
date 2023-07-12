@@ -67,6 +67,7 @@ fail_sum = pivot_table[[400, 401, 406, 409]].sum(axis=1)
 total_sum = pivot_table[[200, 204, 206, 210, 400, 401, 406, 409]].sum(axis=1)
 
 pivot_table['Total Request'] = total_sum
+pivot_table['Total Failures'] = fail_sum
 
 # Divide the sum of the first two columns by the sum of the remaining two columns
 pivot_table['Fail %'] = (fail_sum / total_sum)*100
