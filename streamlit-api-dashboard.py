@@ -177,4 +177,4 @@ with placeholder.container():
     fig.update_layout(barmode='group', title=dict(text='API Request Timeline', x=0.6), autosize=True,
                       margin=dict(l=0, r=0, t=50, b=50, autoexpand=True))
     fig.update_xaxes(type='category')
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
